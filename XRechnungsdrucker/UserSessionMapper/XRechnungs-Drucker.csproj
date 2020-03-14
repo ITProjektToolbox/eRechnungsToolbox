@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <RootNamespace>XRechnungs_Drucker</RootNamespace>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Ghostscript.NET" Version="1.2.1" />
+    <PackageReference Include="itext7" Version="7.1.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Bytescout.PDFExtractor">
+      <HintPath>Librarys\Bytescout.PDFExtractor.dll</HintPath>
+    </Reference>
+    <Reference Include="Bytescout.PDFExtractor.OCRExtension">
+      <HintPath>Librarys\Bytescout.PDFExtractor.OCRExtension.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
