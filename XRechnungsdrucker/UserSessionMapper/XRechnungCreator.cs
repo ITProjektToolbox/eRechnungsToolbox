@@ -17,8 +17,10 @@ namespace XRechnungs_Drucker
         {
             string pdfFileName = PsToPDF(psfileName);
             string extractedText = PdfToText(pdfFileName);
-            var fields = FieldExtractor.ExtractFieldsFromText(extractedText);            var lineFields = FieldExtractor.ExtractInvoiceLineFields(pdfFileName);
-            var invoice = UBLMapping.CreateInvoice(fields, lineFields);
+            var fields = FieldExtractor.ExtractFieldsFromText(extractedText);            
+            var lineFields = FieldExtractor.ExtractInvoiceLineFields(pdfFileName);
+            var vatBreakDown = FieldExtractor.ComputeTotalsAndCreateVATBreakdown(lineFields, fields);
+            var invoice = UBLMapping.CreateInvoice(fields, lineFields, vatBreakDown);
 
             XmlSerializerNamespaces ns = new XmlSerializerNamespaces();
             ns.Add("ubl", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2");

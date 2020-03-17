@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:XRechnungs_Drucker"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" Visibility="Hidden" Initialized="Window_Initialized">
+        Title="MainWindow" Height="450" Width="800" Visibility="Collapsed" Loaded="Window_Loaded" ShowInTaskbar="False" WindowState="Minimized">
     <Grid>
 
     </Grid>

@@ -142,11 +142,17 @@ namespace XRechnungs_Drucker
                         ended = true;
                         break;
                     }
-                    rowDict.Add(columns[i], row[i].Replace("\"", ""));
+                    if(!columns[i].Equals(""))
+                        rowDict.Add(columns[i], row[i].Replace("\"", ""));
                 }
 
                 if (ended)
                     break;
+
+                //add standard fields
+                rowDict.Add("BT-130", "XPP");
+                rowDict.Add("BT-151", "S");
+
 
                 if(rowDict.TryGetValue("BT-126", out string s))
                 {
@@ -158,6 +164,72 @@ namespace XRechnungs_Drucker
 
 
                 return ret;
+        }
+
+        internal static  List<Dictionary<string, string>> ComputeTotalsAndCreateVATBreakdown(List<Dictionary<string, string>> inLines, Dictionary<string, string> fields)
+        {
+            List<Dictionary<string, string>> ret = new List<Dictionary<string, string>>();
+            Dictionary<string, string> vat19dict = new Dictionary<string, string>();
+            Dictionary<string, string> vat7dict = new Dictionary<string, string>();
+            decimal sum19 = 0;
+            decimal sum7 = 0;
+            decimal remaining = 0;
+
+            foreach(var l in inLines)
+            {
+                if(l.TryGetValue("BT-152", out string s))
+                {
+                    if (s.Equals("19%"))
+                    {
+                        if (l.TryGetValue("BT-131", out string t))
+                        {
+                            sum19 += Decimal.Parse(t.Remove(t.Length-1));
+                        }
+                    }
+
+                    else if (s.Equals("7%"))
+                    {
+                        if (l.TryGetValue("BT-131", out string t))
+                        {
+                            sum7 += Decimal.Parse(t.Remove(t.Length - 1));
+                        }
+                    }
+
+                    else
+                    {
+                        if (l.TryGetValue("BT-131", out string t))
+                        {
+                            remaining += Decimal.Parse(t.Remove(t.Length - 1));
+                        }
+                    }
+                }
+            }
+
+            vat19dict.Add("BT-116", Math.Round(sum19, 2).ToString());
+            vat19dict.Add("BT-118", "S");
+            vat19dict.Add("BT-119", "19");
+            decimal vat19 = Math.Round(sum19 * (decimal)0.19, 2, MidpointRounding.ToPositiveInfinity);
+            vat19dict.Add("BT-117", vat19.ToString());
+            if(sum19 != 0)
+                ret.Add(vat19dict);
+
+            vat7dict.Add("BT-116", Math.Round(sum7, 2).ToString());
+            vat7dict.Add("BT-118", "S");
+            vat7dict.Add("BT-119", "7");
+            decimal vat7 = Math.Round(sum7 * (decimal)0.07, 2, MidpointRounding.ToPositiveInfinity);
+            vat7dict.Add("BT-117", vat7.ToString());
+            if (sum7 != 0)
+                ret.Add(vat7dict);
+
+            decimal totalVat = vat7 + vat19;
+            decimal totalNetto = Math.Round(sum19 + sum7 + remaining, 2);
+            fields.Add("BT-106", totalNetto.ToString());
+            fields.Add("BT-109", totalNetto.ToString());
+            fields.Add("BT-110", totalVat.ToString());
+            fields.Add("BT-112", (totalNetto + totalVat).ToString());
+            fields.Add("BT-115", (totalNetto + totalVat).ToString());
+
+            return ret;
         }
     }
 }

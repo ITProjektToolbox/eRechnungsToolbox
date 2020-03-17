@@ -7,7 +7,7 @@ namespace XRechnungs_Drucker
 {
     class UBLMapping
     {
-        internal static InvoiceType CreateInvoice(Dictionary<string, string> fields, List<Dictionary<string, string>> lineFields)
+        internal static InvoiceType CreateInvoice(Dictionary<string, string> fields, List<Dictionary<string, string>> lineFields, List<Dictionary<string, string>> vatBreakdown)
         {
             var invoice = new InvoiceType();
             string s;
@@ -234,7 +234,19 @@ namespace XRechnungs_Drucker
 
             invoice.TaxTotal = new TaxTotalType[] { BG_22_Part2(ref fields) };
 
-            invoice.TaxTotal[0].TaxSubtotal = new TaxSubtotalType[] { BG_23(ref fields) };
+            if(invoice.TaxTotal != null)
+            {   
+                if(vatBreakdown.Count == 1)
+                {
+                    invoice.TaxTotal[0].TaxSubtotal = new TaxSubtotalType[] { BG_23(vatBreakdown[0]) };
+                }
+                if (vatBreakdown.Count == 2)
+                {
+                    invoice.TaxTotal[0].TaxSubtotal = new TaxSubtotalType[] { BG_23(vatBreakdown[0]), BG_23(vatBreakdown[1]) };
+                }
+
+            }
+                
 
 
 
@@ -1453,7 +1465,7 @@ namespace XRechnungs_Drucker
             return taxTotal;
         }
 
-        private static TaxSubtotalType BG_23(ref Dictionary<string, string> fields)
+        private static TaxSubtotalType BG_23(Dictionary<string, string> fields)
         {
 
             string s;
@@ -1473,6 +1485,7 @@ namespace XRechnungs_Drucker
             {
 
                 taxSubTotal.TaxAmount = taxSubTotal.TaxAmount ?? new TaxAmountType();
+                taxSubTotal.TaxAmount.Value = Decimal.Parse(s);
                 taxSubTotal.TaxAmount.currencyID = "EUR";
                 empty = false;
             }
@@ -1609,7 +1622,7 @@ namespace XRechnungs_Drucker
             {
                 // unitcode
                 inLine.InvoicedQuantity = inLine.InvoicedQuantity ?? new InvoicedQuantityType();
-                inLine.InvoicedQuantity.Value = Decimal.Parse(s);
+                inLine.InvoicedQuantity.unitCode = s;
                 empty = false;
 
             }
@@ -1904,6 +1917,10 @@ namespace XRechnungs_Drucker
                 inLine.Item.ClassifiedTaxCategory = inLine.Item.ClassifiedTaxCategory ?? new TaxCategoryType[] { new TaxCategoryType() };
                 inLine.Item.ClassifiedTaxCategory[0].Percent = inLine.Item.ClassifiedTaxCategory[0].Percent ?? new PercentType1();
                 inLine.Item.ClassifiedTaxCategory[0].Percent.Value = Decimal.Parse(s.Remove(s.Length - 1));
+
+                inLine.Item.ClassifiedTaxCategory[0].TaxScheme = inLine.Item.ClassifiedTaxCategory[0].TaxScheme ?? new TaxSchemeType();
+                inLine.Item.ClassifiedTaxCategory[0].TaxScheme.ID = inLine.Item.ClassifiedTaxCategory[0].TaxScheme.ID ?? new IDType();
+                inLine.Item.ClassifiedTaxCategory[0].TaxScheme.ID.Value = "VAT";
                 empty = false;
             }
 

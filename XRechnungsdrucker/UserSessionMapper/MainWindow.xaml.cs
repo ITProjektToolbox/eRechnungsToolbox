@@ -66,7 +66,7 @@ namespace XRechnungs_Drucker
                 XRechnungCreator.CreateXML(saveFileDialog.FileName, psfilename);
         }
 
-        private void Window_Initialized(object sender, EventArgs e)
+        private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             while (true)
             {
